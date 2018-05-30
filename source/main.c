@@ -12,28 +12,28 @@ void systemMessage(char* msg) {
 
 void copyFile(char *sourcefile, char* destfile)
 {
-    FILE *src = fopen(sourcefile, "rb");
-    if (src)
+    int src = open(sourcefile, O_RDONLY, 0);
+    if (src != -1)
     {
-        FILE *out = fopen(destfile,"wb");
-        if (out)
+        int out = open(destfile, O_WRONLY | O_CREAT | O_TRUNC, 0777);
+        if (out != -1)
         {
-            size_t bytes;
-            char *buffer = malloc(65536);
-            if (buffer != NULL)
-            {
-                while (0 < (bytes = fread(buffer, 1, 65536, src)))
-                    fwrite(buffer, 1, bytes, out);
-                    free(buffer);
-            }
-            fclose(out);
-        }
-        else {
-        }
-        fclose(src);
-    }
-    else {
-    }
+             size_t bytes;
+             char *buffer = malloc(65536);
+             if (buffer != NULL)
+             {
+                 while (0 < (bytes = read(src, buffer, 65536)))
+                     write(out, buffer, bytes);
+                     free(buffer);
+             }
+             close(out);
+         }
+         else {
+         }
+         close(src);
+     }
+     else {
+     }
 }
 
 
@@ -87,7 +87,7 @@ void *nthread_func(void *arg)
 			if ((t2 - t1) >= 15)
 			{
 				t1 = t2;
-                                systemMessage(notify_buf);
+                systemMessage(notify_buf);
 			}
 		}
 		else t1 = 0;
@@ -119,12 +119,12 @@ int _main(struct thread *td) {
       notify_buf[0] = '\0';
       ScePthread nthread;
       scePthreadCreate(&nthread, NULL, nthread_func, NULL, "nthread");
-      FILE *usbdir = fopen("/mnt/usb0/.dirtest", "wb");
+      int usbdir = open("/mnt/usb0/.dirtest", O_WRONLY | O_CREAT | O_TRUNC, 0777);
     
-         if (!usbdir)
+         if (usbdir == -1)
             {
-                usbdir = fopen("/mnt/usb1/.dirtest", "wb");
-                if (!usbdir)
+                usbdir = open("/mnt/usb1/.dirtest", O_WRONLY | O_CREAT | O_TRUNC, 0777);
+                if (usbdir == -1)
                 {
                        	copyFile("/system_data/priv/mms/app.db", "/system_data/priv/mms/app.db_backup");
                         copyFile("/system_data/priv/mms/addcont.db", "/system_data/priv/mms/addcont.db_backup");
@@ -134,12 +134,12 @@ int _main(struct thread *td) {
                 }
                 else
                 {
-                        fclose(usbdir);
+                        close(usbdir);
                         systemMessage("Backing up to USB1");
                         unlink("/mnt/usb1/.dirtest");
                         mkdir("/mnt/usb1/DB_Dackup/", 0777);
-	                copyFile("/system_data/priv/mms/app.db", "/mnt/usb1/DB_Dackup/app.db");
-	                copyFile("/system_data/priv/mms/addcont.db", "/mnt/usb1/DB_Dackup/addcont.db");
+                        copyFile("/system_data/priv/mms/app.db", "/mnt/usb1/DB_Dackup/app.db");
+                        copyFile("/system_data/priv/mms/addcont.db", "/mnt/usb1/DB_Dackup/addcont.db");
                         mkdir("/mnt/usb1/GameSaves/", 0777);
                         mkdir("/mnt/usb1/GameSaves/system_data/", 0777);
                         mkdir("/mnt/usb1/GameSaves/system_data/savedata", 0777);
@@ -157,12 +157,12 @@ int _main(struct thread *td) {
             }
             else
             {
-                        fclose(usbdir);
+                        close(usbdir);
                         systemMessage("Backing up to USB0");
                         unlink("/mnt/usb0/.dirtest");
                         mkdir("/mnt/usb0/DB_Dackup/", 0777);
-	                copyFile("/system_data/priv/mms/app.db", "/mnt/usb0/DB_Dackup/app.db");
-	                copyFile("/system_data/priv/mms/addcont.db", "/mnt/usb0/DB_Dackup/addcont.db");
+                        copyFile("/system_data/priv/mms/app.db", "/mnt/usb0/DB_Dackup/app.db");
+                        copyFile("/system_data/priv/mms/addcont.db", "/mnt/usb0/DB_Dackup/addcont.db");
                         mkdir("/mnt/usb0/GameSaves/", 0777);
                         mkdir("/mnt/usb0/GameSaves/system_data/", 0777);
                         mkdir("/mnt/usb0/GameSaves/system_data/savedata", 0777);
