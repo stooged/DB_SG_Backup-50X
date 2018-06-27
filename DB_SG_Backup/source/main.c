@@ -43,7 +43,6 @@ void copyDir(char *sourcedir, char* destdir)
     struct dirent *dp;
     struct stat info;
     char src_path[1024], dst_path[1024];
-
     dir = opendir(sourcedir);
     if (!dir)
         return;
@@ -103,24 +102,13 @@ int _main(struct thread *td) {
       initKernel();
       initLibc();
       initPthread();
-      DIR *dir;
-      dir = opendir("/system_data/savedata");
-      if (!dir)
-      {
-       syscall(11,patcher,td);
-      }
-      else
-      {
-       closedir(dir);
-      }
-
+      syscall(11,patcher,td);
       initSysUtil();
       nthread_run = 1;
       notify_buf[0] = '\0';
       ScePthread nthread;
       scePthreadCreate(&nthread, NULL, nthread_func, NULL, "nthread");
       int usbdir = open("/mnt/usb0/.dirtest", O_WRONLY | O_CREAT | O_TRUNC, 0777);
-    
          if (usbdir == -1)
             {
                 usbdir = open("/mnt/usb1/.dirtest", O_WRONLY | O_CREAT | O_TRUNC, 0777);
@@ -129,6 +117,8 @@ int _main(struct thread *td) {
                        	copyFile("/system_data/priv/mms/app.db", "/system_data/priv/mms/app.db_backup");
                         copyFile("/system_data/priv/mms/addcont.db", "/system_data/priv/mms/addcont.db_backup");
                         copyFile("/system_data/priv/mms/av_content_bg.db", "/system_data/priv/mms/av_content_bg.db_backup");
+                        copyFile("/user/system/webkit/secure/appcache/ApplicationCache.db", "/user/system/webkit/secure/appcache/ApplicationCache.db_backup");
+						copyFile("/user/system/webkit/webbrowser/appcache/ApplicationCache.db", "/user/system/webkit/webbrowser/appcache/ApplicationCache.db_backup");
                         systemMessage("Internal backup complete.\nThis was only a database backup use a usb drive for full backup.");
                         nthread_run = 0;
                         return 0;
@@ -154,19 +144,24 @@ int _main(struct thread *td) {
                         mkdir("/mnt/usb1/UserData/user/trophy", 0777);
                         mkdir("/mnt/usb1/UserData/user/license", 0777);
                         mkdir("/mnt/usb1/UserData/user/settings", 0777);
+						mkdir("/mnt/usb1/UserData/user/system", 0777);					
+						mkdir("/mnt/usb1/UserData/user/system/webkit", 0777);
+						mkdir("/mnt/usb1/UserData/user/system/webkit/secure", 0777);
+						mkdir("/mnt/usb1/UserData/user/system/webkit/webbrowser", 0777);
                         sprintf(notify_buf, "Copying: User Data\nPlease wait.");
                         copyDir("/system_data/savedata","/mnt/usb1/UserData/system_data/savedata");
                         copyDir("/user/home", "/mnt/usb1/UserData/user/home");
                         copyDir("/user/trophy", "/mnt/usb1/UserData/user/trophy");
                         copyDir("/user/license", "/mnt/usb1/UserData/user/license");
                         copyDir("/user/settings", "/mnt/usb1/UserData/user/settings");
+						copyDir("/user/system/webkit/secure","/mnt/usb1/UserData/user/system/webkit/secure");
+						copyDir("/user/system/webkit/webbrowser","/mnt/usb1/UserData/user/system/webkit/webbrowser");
                         copyDir("/system_data/priv/home","/mnt/usb1/UserData/system_data/priv/home");
                         copyDir("/system_data/priv/license","/mnt/usb1/UserData/system_data/priv/license");
                         copyDir("/system_data/priv/activation","/mnt/usb1/UserData/system_data/priv/activation");
                         notify_buf[0] = '\0';
                         nthread_run = 0;
                         systemMessage("USB Backup Complete.");
-
                 }
             }
             else
@@ -190,12 +185,18 @@ int _main(struct thread *td) {
                         mkdir("/mnt/usb0/UserData/user/trophy", 0777);
                         mkdir("/mnt/usb0/UserData/user/license", 0777);
                         mkdir("/mnt/usb0/UserData/user/settings", 0777);
+						mkdir("/mnt/usb0/UserData/user/system", 0777);					
+						mkdir("/mnt/usb0/UserData/user/system/webkit", 0777);
+						mkdir("/mnt/usb0/UserData/user/system/webkit/secure", 0777);
+						mkdir("/mnt/usb0/UserData/user/system/webkit/webbrowser", 0777);
                         sprintf(notify_buf, "Copying: User Data\nPlease wait.");
                         copyDir("/system_data/savedata","/mnt/usb0/UserData/system_data/savedata");
                         copyDir("/user/home", "/mnt/usb0/UserData/user/home");
                         copyDir("/user/trophy", "/mnt/usb0/UserData/user/trophy");
                         copyDir("/user/license", "/mnt/usb0/UserData/user/license");
                         copyDir("/user/settings", "/mnt/usb0/UserData/user/settings");
+						copyDir("/user/system/webkit/secure","/mnt/usb0/UserData/user/system/webkit/secure");
+						copyDir("/user/system/webkit/webbrowser","/mnt/usb0/UserData/user/system/webkit/webbrowser");
                         copyDir("/system_data/priv/home","/mnt/usb0/UserData/system_data/priv/home");
                         copyDir("/system_data/priv/license","/mnt/usb0/UserData/system_data/priv/license");
                         copyDir("/system_data/priv/activation","/mnt/usb0/UserData/system_data/priv/activation");
